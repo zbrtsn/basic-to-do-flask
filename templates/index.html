@@ -3,134 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Görev Listesi</title>
+    <title>Task List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <style>
         body {
+            background-color: #121212;
+            color: #ffffff;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        #taskForm {
-            display: flex;
-            margin-bottom: 20px;
-        }
-        #taskName {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-right: 10px;
-            font-size: 16px;
-            width: 300px;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
+            text-align: center;
         }
         ul {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
-            width: 100%;
-            max-width: 400px;
         }
         li {
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            background: #2c2c2c;
             margin: 10px 0;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #fff;
+            border-radius: 5px;
+        }
+        .task-name {
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+        .task-actions {
+            display: flex;
+            align-items: center;
+        }
+        .task-actions button {
+            background: none;
+            border: none;
+            color: #ffffff;
             cursor: pointer;
+            margin-left: 10px;
+        }
+        .task-actions button:hover {
+            color: #ff9800;
+        }
+        input[type="text"] {
+            width: calc(100% - 40px);
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: #2c2c2c;
+            color: #ffffff;
+        }
+        input[type="text"]::placeholder {
+            color: #888888;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.5);
+        }
+        .add-task-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #ff9800;
+            color: #ffffff;
             font-size: 16px;
-        }
-        li.done {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-            text-decoration: line-through;
-        }
-        .checkbox {
-            margin-right: 10px;
             cursor: pointer;
+        }
+        .add-task-btn:hover {
+            background: #e68900;
         }
     </style>
 </head>
 <body>
-    <h1>Görev Listesi</h1>
-    <div id="taskForm">
-        <input type="text" id="taskName" placeholder="Görev adı" />
-        <button onclick="addTask()">Görev Ekle</button>
+    <div class="container">
+        <h1>Task List</h1>
+        <input type="text" id="new-task" placeholder="Add a new task">
+        <button class="add-task-btn" onclick="addTask()">Add Task</button>
+        <ul id="task-list"></ul>
     </div>
-    <ul id="taskList"></ul>
-
     <script>
-        async function fetchTasks() {
-            const response = await fetch('/tasks');
-            const tasks = await response.json();
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = '';
-            tasks.forEach(task => {
-                const li = document.createElement('li');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.checked = task.done;
-                checkbox.classList.add('checkbox');
-                checkbox.addEventListener('change', () => toggleTask(task.id, checkbox.checked));
-
-                li.appendChild(checkbox);
-                li.appendChild(document.createTextNode(task.name));
-                if (task.done) {
-                    li.classList.add('done');
-                }
-
-                taskList.appendChild(li);
-            });
-        }
-
-        async function addTask() {
-            const name = document.getElementById('taskName').value;
-            if (!name) return;
-
-            await fetch('/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name })
-            });
-
-            document.getElementById('taskName').value = '';
+        document.addEventListener('DOMContentLoaded', function() {
             fetchTasks();
+        });
+
+        function fetchTasks() {
+            fetch('/tasks')
+                .then(response => response.json())
+                .then(data => {
+                    const taskList = document.getElementById('task-list');
+                    taskList.innerHTML = '';
+                    data.forEach(task => {
+                        const taskItem = document.createElement('li');
+                        taskItem.innerHTML = `
+                            <input type="checkbox" ${task.done ? 'checked' : ''} onclick="toggleTask(${task.id}, this)">
+                            <span class="task-name">${task.name}</span>
+                            <div class="task-actions">
+                                <button onclick="editTask(${task.id}, '${task.name}')"><i class="fas fa-edit"></i></button>
+                                <button onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                        taskList.appendChild(taskItem);
+                    });
+                });
         }
 
-        async function toggleTask(id, done) {
-            await fetch(`/tasks/${id}`, {
+        function addTask() {
+            const taskInput = document.getElementById('new-task');
+            const taskName = taskInput.value.trim();
+            if (taskName) {
+                fetch('/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: taskName })
+                })
+                .then(response => response.json())
+                .then(() => {
+                    taskInput.value = '';
+                    fetchTasks();
+                });
+            }
+        }
+
+        function toggleTask(id, checkbox) {
+            fetch(`/tasks/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ done })
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ done: checkbox.checked })
+            })
+            .then(response => response.json())
+            .then(() => {
+                fetchTasks();
             });
-
-            fetchTasks();
         }
 
-        fetchTasks();
+        function deleteTask(id) {
+            fetch(`/tasks/${id}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(() => {
+                fetchTasks();
+            });
+        }
+
+        function editTask(id, currentName) {
+            const newName = prompt('Edit Task Name', currentName);
+            if (newName && newName.trim() !== '') {
+                fetch(`/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: newName })
+                })
+                .then(response => response.json())
+                .then(() => {
+                    fetchTasks();
+                });
+            }
+        }
     </script>
 </body>
 </html>
-
