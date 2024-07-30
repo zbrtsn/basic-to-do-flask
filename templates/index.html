@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Görev Listesi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        #taskForm {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #taskName {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 16px;
+            width: 300px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            width: 100%;
+            max-width: 400px;
+        }
+        li {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        li.done {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            text-decoration: line-through;
+        }
+        .checkbox {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Görev Listesi</h1>
+    <div id="taskForm">
+        <input type="text" id="taskName" placeholder="Görev adı" />
+        <button onclick="addTask()">Görev Ekle</button>
+    </div>
+    <ul id="taskList"></ul>
+
+    <script>
+        async function fetchTasks() {
+            const response = await fetch('/tasks');
+            const tasks = await response.json();
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.done;
+                checkbox.classList.add('checkbox');
+                checkbox.addEventListener('change', () => toggleTask(task.id, checkbox.checked));
+
+                li.appendChild(checkbox);
+                li.appendChild(document.createTextNode(task.name));
+                if (task.done) {
+                    li.classList.add('done');
+                }
+
+                taskList.appendChild(li);
+            });
+        }
+
+        async function addTask() {
+            const name = document.getElementById('taskName').value;
+            if (!name) return;
+
+            await fetch('/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+
+            document.getElementById('taskName').value = '';
+            fetchTasks();
+        }
+
+        async function toggleTask(id, done) {
+            await fetch(`/tasks/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ done })
+            });
+
+            fetchTasks();
+        }
+
+        fetchTasks();
+    </script>
+</body>
+</html>
+
