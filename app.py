@@ -26,7 +26,10 @@ def update_task(task_id):
     if not task:
         return jsonify({'error': 'Task not found'}), 404
     
-    task['done'] = data.get('done', task['done'])
+    if 'name' in data:
+        task['name'] = data['name']
+    if 'done' in data:
+        task['done'] = data['done']
     return jsonify(task)
 
 @app.route('/tasks/<int:task_id>', methods=['DELETE'])
@@ -36,5 +39,4 @@ def delete_task(task_id):
     return jsonify({'message': 'Task deleted'}), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port= 5000, debug= True)
-
+    app.run(host='0.0.0.0', port=5000, debug=True)
