@@ -54,8 +54,12 @@
         .task-actions button:hover {
             color: #ff9800;
         }
+        .input-container {
+            display: flex;
+            align-items: center;
+        }
         input[type="text"] {
-            width: calc(100% - 40px);
+            flex-grow: 1;
             padding: 10px;
             margin: 10px 0;
             border: none;
@@ -70,14 +74,15 @@
             transform: scale(1.5);
         }
         .add-task-btn {
-            width: 100%;
             padding: 10px;
+            margin: 10px 0 10px 10px;
             border: none;
             border-radius: 5px;
             background: #ff9800;
             color: #ffffff;
             font-size: 16px;
             cursor: pointer;
+            height: 40px;  /* Input ile aynı yükseklikte olması için */
         }
         .add-task-btn:hover {
             background: #e68900;
@@ -87,8 +92,10 @@
 <body>
     <div class="container">
         <h1>Task List</h1>
-        <input type="text" id="new-task" placeholder="Add a new task">
-        <button class="add-task-btn" onclick="addTask()">Add Task</button>
+        <div class="input-container">
+            <input type="text" id="new-task" placeholder="Add a new task">
+            <button class="add-task-btn" onclick="addTask()">Add Task</button>
+        </div>
         <ul id="task-list"></ul>
     </div>
     <script>
