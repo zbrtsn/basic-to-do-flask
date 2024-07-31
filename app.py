@@ -1,63 +1,67 @@
 from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
+import json
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tasks.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+TASKS_FILE = 'tasks.json'
 
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    done = db.Column(db.Boolean, default=False)
-    due_date = db.Column(db.Date, nullable=True)
+def read_tasks():
+    with open(TASKS_FILE, 'r') as f:
+        return json.load(f)
+
+def write_tasks(tasks):
+    with open(TASKS_FILE, 'w') as f:
+        json.dump(tasks, f, indent=4)
 
 @app.route('/tasks', methods=['GET', 'POST'])
 def tasks():
     if request.method == 'GET':
-        tasks = Task.query.all()
-        return jsonify([{
-            'id': task.id,
-            'name': task.name,
-            'done': task.done,
-            'due_date': task.due_date.isoformat() if task.due_date else None
-        } for task in tasks])
+        tasks = read_tasks()
+        return jsonify(tasks)
     elif request.method == 'POST':
         data = request.get_json()
-        new_task = Task(name=data['name'])
-        db.session.add(new_task)
-        db.session.commit()
-        return jsonify({'id': new_task.id})
+        tasks = read_tasks()
+        new_task = {
+            'id': len(tasks) + 1,
+            'name': data['name'],
+            'done': False,
+            'due_date': data.get('due_date')
+        }
+        tasks.append(new_task)
+        write_tasks(tasks)
+        return jsonify(new_task), 201
 
 @app.route('/tasks/<int:id>', methods=['PUT', 'DELETE'])
 def task(id):
-    task = Task.query.get_or_404(id)
+    tasks = read_tasks()
+    task = next((t for t in tasks if t['id'] == id), None)
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+
     if request.method == 'PUT':
         data = request.get_json()
-        if 'name' in data:
-            task.name = data['name']
-        if 'done' in data:
-            task.done = data['done']
-        db.session.commit()
-        return jsonify({'id': task.id})
+        task['name'] = data.get('name', task['name'])
+        task['done'] = data.get('done', task['done'])
+        task['due_date'] = data.get('due_date', task['due_date'])
+        write_tasks(tasks)
+        return jsonify(task)
+    
     elif request.method == 'DELETE':
-        db.session.delete(task)
-        db.session.commit()
-        return jsonify({'result': 'success'})
+        tasks = [t for t in tasks if t['id'] != id]
+        write_tasks(tasks)
+        return jsonify({'message': 'Task deleted'}), 200
 
 @app.route('/tasks/calendar', methods=['GET'])
 def tasks_calendar():
-    tasks = Task.query.all()
+    tasks = read_tasks()
     events = []
     for task in tasks:
-        if task.due_date:
+        if task.get('due_date'):
             events.append({
-                'title': task.name,
-                'start': task.due_date.isoformat()
+                'title': task['name'],
+                'start': task['due_date']
             })
     return jsonify(events)
 
 if __name__ == '__main__':
-    db.create_all()
     app.run(debug=True)
