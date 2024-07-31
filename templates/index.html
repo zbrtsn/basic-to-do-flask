@@ -99,6 +99,17 @@
             font-size: 24px;
             color: inherit;
         }
+        .calendar-link {
+            display: block;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            color: #ff9800;
+            text-decoration: none;
+        }
+        .calendar-link:hover {
+            color: #e68900;
+        }
         .light-theme {
             --bg-color: #ffffff;
             --text-color: #000000;
@@ -149,6 +160,7 @@
             <button class="add-task-btn" onclick="addTask()">Add Task</button>
         </div>
         <ul id="task-list"></ul>
+        <a href="/calendar" class="calendar-link">View Calendar</a>
         <button class="theme-toggle" onclick="toggleTheme()">
             <i id="theme-icon" class="fas fa-sun"></i>
         </button>
