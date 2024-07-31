@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.2/main.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .calendar-container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .back-link {
+            display: block;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 18px;
+            color: #ff9800;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #e68900;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <a href="/" class="back-link">Back to Task List</a>
+        <div id="calendar"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.2/main.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: '/tasks/calendar'  // Endpoint to get tasks in calendar format
+            });
+            calendar.render();
+        });
+    </script>
+</body>
+</html>
