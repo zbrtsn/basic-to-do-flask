@@ -8,17 +8,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <style>
         body {
-            background-color: #121212;
-            color: #ffffff;
             font-family: Arial, sans-serif;
+            transition: background-color 0.5s, color 0.5s;
         }
         .container {
             max-width: 600px;
             margin: 50px auto;
             padding: 20px;
-            background-color: #1e1e1e;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.5s;
         }
         h1 {
             text-align: center;
@@ -31,10 +30,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #2c2c2c;
             margin: 10px 0;
             padding: 10px;
             border-radius: 5px;
+            transition: background-color 0.5s;
         }
         .task-name {
             flex-grow: 1;
@@ -47,7 +46,7 @@
         .task-actions button {
             background: none;
             border: none;
-            color: #ffffff;
+            color: inherit;
             cursor: pointer;
             margin-left: 10px;
         }
@@ -64,11 +63,12 @@
             margin: 10px 0;
             border: none;
             border-radius: 5px;
-            background: #2c2c2c;
-            color: #ffffff;
+            background: inherit;
+            color: inherit;
+            transition: background-color 0.5s, color 0.5s;
         }
         input[type="text"]::placeholder {
-            color: #888888;
+            color: inherit;
         }
         input[type="checkbox"] {
             transform: scale(1.5);
@@ -82,10 +82,62 @@
             color: #ffffff;
             font-size: 16px;
             cursor: pointer;
-            height: 40px;  /* Input ile aynı yükseklikte olması için */
+            height: 40px;
         }
         .add-task-btn:hover {
             background: #e68900;
+        }
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .theme-toggle i {
+            font-size: 24px;
+            color: inherit;
+        }
+        .light-theme {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --input-bg-color: #f0f0f0;
+            --container-bg-color: #f9f9f9;
+            --li-bg-color: #e0e0e0;
+        }
+        .dark-theme {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --input-bg-color: #2c2c2c;
+            --container-bg-color: #1e1e1e;
+            --li-bg-color: #2c2c2c;
+        }
+        body.light-theme {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        body.light-theme .container {
+            background-color: var(--container-bg-color);
+        }
+        body.light-theme li {
+            background-color: var(--li-bg-color);
+        }
+        body.light-theme input[type="text"] {
+            background-color: var(--input-bg-color);
+        }
+        body.dark-theme {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        body.dark-theme .container {
+            background-color: var(--container-bg-color);
+        }
+        body.dark-theme li {
+            background-color: var(--li-bg-color);
+        }
+        body.dark-theme input[type="text"] {
+            background-color: var(--input-bg-color);
         }
     </style>
 </head>
@@ -97,9 +149,13 @@
             <button class="add-task-btn" onclick="addTask()">Add Task</button>
         </div>
         <ul id="task-list"></ul>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <i id="theme-icon" class="fas fa-sun"></i>
+        </button>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            applyTheme();
             fetchTasks();
         });
 
@@ -181,6 +237,29 @@
                 .then(() => {
                     fetchTasks();
                 });
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                localStorage.setItem('theme', 'dark-theme');
+                document.getElementById('theme-icon').classList.replace('fa-sun', 'fa-moon');
+            } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                localStorage.setItem('theme', 'light-theme');
+                document.getElementById('theme-icon').classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light-theme';
+            document.body.classList.add(savedTheme);
+            if (savedTheme === 'dark-theme') {
+                document.getElementById('theme-icon').classList.replace('fa-sun', 'fa-moon');
             }
         }
     </script>
