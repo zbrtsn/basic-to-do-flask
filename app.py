@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -15,7 +16,12 @@ def get_tasks():
 @app.route('/tasks', methods=['POST'])
 def add_task():
     data = request.get_json()
-    task = {'id': len(tasks) + 1, 'name': data['name'], 'done': False}
+    task = {
+        'id': len(tasks) + 1,
+        'name': data['name'],
+        'done': False,
+        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Ekleme tarihini ekle
+    }
     tasks.append(task)
     return jsonify(task), 201
 
