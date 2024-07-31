@@ -49,7 +49,7 @@
             const calendarEl = document.getElementById('calendar');
             const calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                events: '/tasks/calendar'  // Endpoint to get tasks in calendar format
+                events: '/tasks/calendar'
             });
             calendar.render();
         });
