@@ -22,11 +22,18 @@
         h1 {
             text-align: center;
         }
-        ul {
+        .list-container {
+            margin: 20px 0;
+        }
+        .list-container h2 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .task-list {
             list-style: none;
             padding: 0;
         }
-        li {
+        .task-list li {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -34,23 +41,24 @@
             padding: 10px;
             border-radius: 5px;
             transition: background-color 0.5s;
+            position: relative;
         }
-        .task-name {
-            flex-grow: 1;
-            margin: 0 10px;
+        .task-list li .task-date {
+            font-size: 0.8em;
+            color: #888;
         }
-        .task-actions {
+        .task-list li .task-actions {
             display: flex;
             align-items: center;
         }
-        .task-actions button {
+        .task-list li .task-actions button {
             background: none;
             border: none;
             color: inherit;
             cursor: pointer;
             margin-left: 10px;
         }
-        .task-actions button:hover {
+        .task-list li .task-actions button:hover {
             color: #ff9800;
         }
         .input-container {
@@ -120,7 +128,7 @@
         body.light-theme .container {
             background-color: var(--container-bg-color);
         }
-        body.light-theme li {
+        body.light-theme .task-list li {
             background-color: var(--li-bg-color);
         }
         body.light-theme input[type="text"] {
@@ -133,11 +141,19 @@
         body.dark-theme .container {
             background-color: var(--container-bg-color);
         }
-        body.dark-theme li {
+        body.dark-theme .task-list li {
             background-color: var(--li-bg-color);
         }
         body.dark-theme input[type="text"] {
             background-color: var(--input-bg-color);
+        }
+        .completed-task {
+            text-decoration: line-through;
+            opacity: 0.5;
+            transition: opacity 0.5s;
+        }
+        .completed-task.fade-out {
+            opacity: 0;
         }
     </style>
 </head>
@@ -148,7 +164,14 @@
             <input type="text" id="new-task" placeholder="Add a new task">
             <button class="add-task-btn" onclick="addTask()">Add Task</button>
         </div>
-        <ul id="task-list"></ul>
+        <div class="list-container">
+            <h2>Tasks To Do</h2>
+            <ul id="todo-list" class="task-list"></ul>
+        </div>
+        <div class="list-container">
+            <h2>Completed Tasks</h2>
+            <ul id="completed-list" class="task-list"></ul>
+        </div>
         <button class="theme-toggle" onclick="toggleTheme()">
             <i id="theme-icon" class="fas fa-sun"></i>
         </button>
@@ -163,19 +186,26 @@
             fetch('/tasks')
                 .then(response => response.json())
                 .then(data => {
-                    const taskList = document.getElementById('task-list');
-                    taskList.innerHTML = '';
+                    const todoList = document.getElementById('todo-list');
+                    const completedList = document.getElementById('completed-list');
+                    todoList.innerHTML = '';
+                    completedList.innerHTML = '';
                     data.forEach(task => {
                         const taskItem = document.createElement('li');
                         taskItem.innerHTML = `
                             <input type="checkbox" ${task.done ? 'checked' : ''} onclick="toggleTask(${task.id}, this)">
-                            <span class="task-name">${task.name}</span>
+                            <span class="task-name ${task.done ? 'completed-task' : ''}">${task.name}</span>
+                            <span class="task-date">${task.created_at}</span>
                             <div class="task-actions">
                                 <button onclick="editTask(${task.id}, '${task.name}')"><i class="fas fa-edit"></i></button>
                                 <button onclick="deleteTask(${task.id})"><i class="fas fa-trash"></i></button>
                             </div>
                         `;
-                        taskList.appendChild(taskItem);
+                        if (task.done) {
+                            completedList.appendChild(taskItem);
+                        } else {
+                            todoList.appendChild(taskItem);
+                        }
                     });
                 });
         }
