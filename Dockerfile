@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy requirements and install
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-RUN MKDIR /app/abc
+RUN MKDIR -p /app/abc
 
 # Copy the rest of the application
 COPY . .
