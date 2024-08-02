@@ -11,3 +11,5 @@ recommended tagname is "latest"
 $ docker pull pyouck/basic_todo_flask:latest
 ```
 
+I have some other repos linked with this flask app. <br>
+[Check it out](https://github.com/zbrtsn/kurbernetes-kind)
